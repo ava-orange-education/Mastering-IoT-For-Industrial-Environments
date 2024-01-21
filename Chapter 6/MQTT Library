@@ -1,0 +1,66 @@
+#include <ESP8266WiFi.h>
+#include <PubSubClient.h>
+
+// Replace with your network credentials
+const char* ssid = "YourWiFiSSID";
+const char* password = "YourWiFiPassword";
+
+// MQTT broker details
+const char* mqtt_server = "MQTTBrokerIPAddress";
+const char* mqtt_topic = "esp/test"; // MQTT topic to subscribe to
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+void callback(char* topic, byte* payload, unsigned int length);
+
+void setup() {
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
+  }
+  Serial.println("Connected to WiFi");
+
+  client.setServer(mqtt_server, 1883);
+  client.setCallback(callback);
+
+  // Connect to MQTT broker
+  reconnect();
+}
+
+void loop() {
+  if (!client.connected()) {
+    reconnect();
+  }
+  client.loop();
+}
+
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.println("Message received on topic: " + String(topic));
+
+  Serial.print("Message content: ");
+  for (int i = 0; i < length; i++) {
+    Serial.print((char)payload[i]);
+  }
+  Serial.println();
+
+  // You can add your custom logic here to handle the incoming message
+}
+
+void reconnect() {
+  while (!client.connected()) {
+    Serial.println("Connecting to MQTT...");
+    if (client.connect("ESP-12-Client")) {
+      Serial.println("Connected to MQTT");
+      client.subscribe(mqtt_topic); // Subscribe to the MQTT topic
+    } else {
+      Serial.print("MQTT connection failed, rc=");
+      Serial.print(client.state());
+      Serial.println(" Retry in 5 seconds");
+      delay(5000);
+    }
+  }
+}
