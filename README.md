@@ -1,2 +1,2 @@
-# Practical-IoT-For-Industrial-Environments
-Practical IoT For Industrial Environments, published by Orange, AVA™
+# Mastering IoT For Industrial Environments
+Mastering IoT For Industrial Environments, published by Orange, AVA™
